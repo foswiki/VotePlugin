@@ -1,0 +1,9 @@
+*.swp
+igp_*
+VotePlugin.md5
+VotePlugin.sha1
+VotePlugin.tgz
+VotePlugin.txt
+VotePlugin.zip
+VotePlugin_installer
+VotePlugin_installer.pl
