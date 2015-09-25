@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2005-2009 Michael Daum <micha@nats.informatik.uni-hamburg.de>
+# Copyright (C) 2005-2015 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -24,7 +24,7 @@ use vars qw(
 );
 
 $VERSION           = '1.33';
-$RELEASE           = '1.33';
+$RELEASE           = '3 May 2011';
 $NO_PREFS_IN_TOPIC = 1;
 $SHORTDESCRIPTION  = 'Simple way to count votes';
 

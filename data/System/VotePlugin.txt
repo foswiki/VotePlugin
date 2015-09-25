@@ -1,14 +1,7 @@
 %META:TOPICINFO{author="ProjectContributor" date="1407719141" format="1.1" version="1"}%
-<!--
-
-   PLEASE DO NOT EDIT THIS TOPIC
-
-   It is automatically generated from the subversion repository, and any changes
-   you make will simply be overwritten the next time a release is generated.
-
-   Instead, you could check your fix in, raise a bug in the Bugs web, or mail the author.
--->
 ---+!! <nop>%TOPIC%
+%SHORTDESCRIPTION%
+
 This plugin can be used to build an online-voting system, or _poll_.
 There are two ways to vote for an item:
    * *select*: vote for a given choice from a selection  <br /><img src="%ATTACHURLPATH%/example_select.gif" />
@@ -184,16 +177,9 @@ Note that it is important to finalise the setting, otherwise it can be overridde
 in !%USERSWEB%.SitePreferences, and add =VOTEPLUGIN_RESETTERS= to =FINALPREFERENCES=.
 </verbatim>
 
----++ Plugin Info
-<!-- provided for compatibility only
-   * Set SHORTDESCRIPTION = Simple way to count votes
--->
-|  Plugin Author: | Foswiki:Main/MichaelDaum |
-|  Copyright &copy;: | 2005-2009, Michael Daum http://michaeldaumconsulting.com |
-|  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
-|  Release: | %$RELEASE% |
-|  Version: | %$VERSION% |
-|  Change History: | &nbsp; | 
+---++ Change History
+
+%TABLE{columnwidths="7em" tablewidth="100%"}%
 |  10 Jun 2009 | Foswikitask:Item8010: incorporate upstream fixes, and port to Foswiki - Foswiki:Main/CrawfordCurrie |
 |  14 Oct 2008 | Item6070 works for hierarchical webs now. - Foswiki:Main/ColasNahaboo |
 |  10 Aug 2008 | Item5768 suppress submission of individual ratings in a multi-row vote Item5769 correct default handling of transcluded rates Item5766 $large is once again large Item5771 support for resetting votes. |
@@ -214,12 +200,19 @@ in !%USERSWEB%.SitePreferences, and add =VOTEPLUGIN_RESETTERS= to =FINALPREFEREN
 |  14 Apr 2005: | incorporated =getLocaldate()= function |
 |  16 Mar 2005: | use Cache API only if its there; delayed =use &lt;package&gt;= | 
 |   7 Mar 2005: | Initial version |
-|  Dependencies: | %$DEPENDENCIES% |
-|  Plugin Home: | Foswiki:Extensions/%TOPIC% |
-|  Feedback: | Foswiki:Extensions/%TOPIC%Dev |
-|  Appraisal: | Foswiki:Extensions/%TOPIC%Appraisal |
+
+<!-- 
+   * Set SHORTDESCRIPTION = %$SHORTDESCRIPTION%
+-->
 
 %META:FILEATTACHMENT{name="example_select.gif" attr="h" comment="" version="1"}%
 %META:FILEATTACHMENT{name="example_stars.gif" attr="h" comment="" version="1"}%
-
--- Foswiki:Main.MichaelDaum - 31 Aug 2006
+%META:FORM{name="PackageForm"}%
+%META:FIELD{name="Author" title="Author" value="Foswiki:Main/MichaelDaum"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2005-2015, Michael Daum http://michaeldaumconsulting.com"}%
+%META:FIELD{name="Home" title="Home" value="Foswiki:Extensions/%TOPIC%"}%
+%META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
+%META:FIELD{name="Release" title="Release" value="%$RELEASE%"}%
+%META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/VotePlugin"}%
+%META:FIELD{name="Support" title="Support" value="http://foswiki.org/Support/VotePlugin"}%
+%META:FIELD{name="Version" title="Version" value="%$VERSION%"}%
