@@ -216,7 +216,7 @@ sub handleVote {
                 $voteSum{$key} += $weight;
                 if ( $choice =~ /^[\d.]+$/ ) {
                     $totalRate{$key} += $choice * $weight;
-                    $rateSum += $choice * $weight;
+                    $rateSum{$key}   += $choice * $weight;
                 }
                 $totalVoters{$key}{$vid}++;
             }
@@ -256,13 +256,14 @@ sub handleVote {
             # num_votes>0
             # avg_rating: The average rating of each item (again, of those that
             # have num_votes>0)
-            my $avg_num_votes = $numItems ? $voteSum{$key} / $numItems      : 0;
-            my $avg_rating    = $voteSum  ? $rateSum{$key} / $voteSum{$key} : 0;
+            my $avg_num_votes = $numItems ? $voteSum{$key} / $numItems : 0;
+            my $avg_rating =
+              $voteSum{$key} ? $rateSum{$key} / $voteSum{$key} : 0;
             my $myLastVote =
               $votes{ getIdent( $isSecret, $isOpen ) }{$id}{$key}->[0] || 0;
             my $mean = 0;
             if ( $totalVotes{$key}{$id} ) {
-                $mean = $totalRate{$key}{$id} / $totalVotes{$key}{$id};
+                $mean = $totalRate{$key} / $totalVotes{$key}{$id};
                 if ($bayesian) {
                     $mean =
                       ( $avg_num_votes * $avg_rating +
