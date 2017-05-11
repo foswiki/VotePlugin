@@ -202,8 +202,8 @@ sub handleVote {
     my %totalVoters;     # how many different people voted for each key
     my %totalRate;       # Total of all ratings for each key
     my %items;           # Hash of id's that have the same key
-    my $voteSum = 0;     # Sum of the number of votes on all rated items
-    my $rateSum = 0;     # Sum of all ratings of rated items
+    my %voteSum;         # Sum of the number of votes on all rated items
+    my %rateSum;         # Sum of all ratings of rated items
 
     foreach my $voter ( keys %votes ) {
         foreach my $vid ( keys %{ $votes{$voter} } ) {
@@ -211,14 +211,14 @@ sub handleVote {
                 my $choice = $votes{$voter}{$vid}{$key}->[0];
                 my $weight = $votes{$voter}{$vid}{$key}->[1];
                 $keyValueFreq{$vid}{$key}{$choice} += $weight;
-                $totalVotes{$key} += $weight;
+                $totalVotes{$key}{$vid} += $weight;
                 $items{$key}{$vid} = 1;
-                $voteSum += $weight;
+                $voteSum{$key} += $weight;
                 if ( $choice =~ /^[\d.]+$/ ) {
                     $totalRate{$key} += $choice * $weight;
                     $rateSum += $choice * $weight;
                 }
-                $totalVoters{$key}++;
+                $totalVoters{$key}{$vid}++;
             }
         }
     }
@@ -256,25 +256,25 @@ sub handleVote {
             # num_votes>0
             # avg_rating: The average rating of each item (again, of those that
             # have num_votes>0)
-            my $avg_num_votes = $numItems ? $voteSum / $numItems : 0;
-            my $avg_rating    = $voteSum  ? $rateSum / $voteSum  : 0;
+            my $avg_num_votes = $numItems ? $voteSum{$key} / $numItems      : 0;
+            my $avg_rating    = $voteSum  ? $rateSum{$key} / $voteSum{$key} : 0;
             my $myLastVote =
               $votes{ getIdent( $isSecret, $isOpen ) }{$id}{$key}->[0] || 0;
             my $mean = 0;
-            if ( $totalVotes{$key} ) {
-                $mean = $totalRate{$key} / $totalVotes{$key};
+            if ( $totalVotes{$key}{$id} ) {
+                $mean = $totalRate{$key}{$id} / $totalVotes{$key}{$id};
                 if ($bayesian) {
                     $mean =
                       ( $avg_num_votes * $avg_rating +
-                          $totalVotes{$key} * $mean ) /
-                      ( $avg_num_votes + $totalVotes{$key} );
+                          $totalVotes{$key}{$id} * $mean ) /
+                      ( $avg_num_votes + $totalVotes{$key}{$id} );
                 }
             }
             push(
                 @rows,
                 showLineOfStars(
                     $id, $prompt, $submit, $needSubmit, $act, $mean,
-                    $myLastVote, $totalVoters{$key} || 0
+                    $myLastVote, $totalVoters{$key}{$id} || 0
                 )
             );
         }
@@ -299,8 +299,7 @@ sub handleVote {
             push(
                 @rows,
                 showSelect(
-                    $id, $prompt, $submit, $select,
-                    $keyValueFreq{$id}{$key},
+                    $id, $prompt, $submit, $select, $keyValueFreq{$id}{$key},
                     $totalVotes{$key}, $params
                 )
             );
@@ -636,8 +635,8 @@ sub getIdent {
 
 ###############################################################################
 sub showSelect {
-    my ( $id, $prompt, $submit, $select, $keyValueFreq, $totalVotes, $params ) =
-      @_;
+    my ( $id, $prompt, $submit, $select, $keyValueFreq, $totalVotes, $params )
+      = @_;
 
     my $key   = $prompt->{name};
     my $totty = $totalVotes || 0;
