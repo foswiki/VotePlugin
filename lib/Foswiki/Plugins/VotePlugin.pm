@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2005-2015 Michael Daum http://michaeldaumconsulting.com
+# Copyright (C) 2005-2017 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -13,47 +13,44 @@
 # GNU General Public License for more details, published at
 # http://www.gnu.org/copyleft/gpl.html
 
-###############################################################################
 package Foswiki::Plugins::VotePlugin;
+
 use strict;
+use warnings;
+use Foswiki::Func();
 
-###############################################################################
-use vars qw(
-  $isInitialized
-  $VERSION $RELEASE $NO_PREFS_IN_TOPIC $SHORTDESCRIPTION
-);
+our $VERSION = '1.99_001';
+our $RELEASE = '20 Feb 2017';
+our $NO_PREFS_IN_TOPIC = 1;
+our $SHORTDESCRIPTION = 'Simple way to count votes';
+our $core;
 
-$VERSION           = '1.33';
-$RELEASE           = '3 May 2011';
-$NO_PREFS_IN_TOPIC = 1;
-$SHORTDESCRIPTION  = 'Simple way to count votes';
-
-###############################################################################
 sub initPlugin {
-    my ( $topic, $web ) = @_;
-    $isInitialized = 0;
-    require Foswiki::Func;
-    Foswiki::Func::registerTagHandler( 'VOTE', \&handleVote );
-    return 1;
+
+  $core = undef;
+
+  Foswiki::Func::registerTagHandler(
+    'VOTE',
+    sub {
+      return getCore()->handleVOTE(@_);
+    }
+  );
+
+  return 1;
 }
 
-###############################################################################
-sub handleVote {
+sub finishPlugin {
+  undef $core;
+}
 
-    #my ($session, $params, $topic, $web) = @_;
+sub getCore {
 
-    unless ($isInitialized) {
-        eval 'use Foswiki::Plugins::VotePlugin::Core;';
-        die $@ if $@;
-        $isInitialized = 1;
+  unless (defined $core) {
+    require Foswiki::Plugins::VotePlugin::Core;
+    $core = Foswiki::Plugins::VotePlugin::Core->new();
+  }
 
-        # Register vote now so we only get it done once per topic. It doesn't
-        # matter which %VOTE triggers this, as the query carries all the info
-        # about where to save the data, the id etc.
-        Foswiki::Plugins::VotePlugin::Core::registerVote();
-    }
-
-    return Foswiki::Plugins::VotePlugin::Core::handleVote(@_);
+  return $core;
 }
 
 1;
