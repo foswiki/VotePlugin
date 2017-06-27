@@ -43,7 +43,7 @@ sub handleVOTE {
   unless (defined $type) {
     # determin type automatically for backwards compatibility;
     $type = 'legacySelect' if defined $params->{select1};
-    $type = 'legacyStar' if defined $params->{stars1};
+    $type = 'legacyStars' if defined $params->{stars1};
   }
 
   $type //= "default";
@@ -201,8 +201,8 @@ sub handleVOTE {
   my %totalVoters;     # how many different people voted for each key
   my %totalRate;       # Total of all ratings for each key
   my %items;           # Hash of id's that have the same key
-  my $voteSum = 0;     # Sum of the number of votes on all rated items
-  my $rateSum = 0;     # Sum of all ratings of rated items
+  my %voteSum;         # Sum of the number of votes on all rated items
+  my %rateSum;         # Sum of all ratings of rated items
 
   foreach my $voter (keys %votes) {
     foreach my $vid (keys %{$votes{$voter}}) {
@@ -210,14 +210,14 @@ sub handleVOTE {
         my $choice = $votes{$voter}{$vid}{$key}->[0];
         my $weight = $votes{$voter}{$vid}{$key}->[1];
         $keyValueFreq{$vid}{$key}{$choice} += $weight;
-        $totalVotes{$key} += $weight;
+        $totalVotes{$key}{$vid} += $weight;
         $items{$key}{$vid} = 1;
-        $voteSum += $weight;
+        $voteSum{$key} += $weight;
         if ($choice =~ /^[\d.]+$/) {
-          $totalRate{$key} += $choice * $weight;
-          $rateSum += $choice * $weight;
+          $totalRate{$key}{$vid} += $choice * $weight;
+          $rateSum{$key} += $choice * $weight;
         }
-        $totalVoters{$key}++;
+        $totalVoters{$key}{$vid}++;
       }
     }
   }
@@ -254,18 +254,18 @@ sub handleVOTE {
       # num_votes>0
       # avg_rating: The average rating of each item (again, of those that
       # have num_votes>0)
-      my $avg_num_votes = $numItems ? $voteSum / $numItems : 0;
-      my $avg_rating = $voteSum ? $rateSum / $voteSum : 0;
+      my $avg_num_votes = $numItems ? $voteSum{$key} / $numItems : 0;
+      my $avg_rating = $voteSum{$key} ? $rateSum{$key} / $voteSum{$key} : 0;
       my $myLastVote =
         $votes{$this->getIdent($isSecret, $isOpen)}{$id}{$key}->[0] || 0;
       my $mean = 0;
-      if ($totalVotes{$key}) {
-        $mean = $totalRate{$key} / $totalVotes{$key};
+      if ($totalVotes{$key}{$id}) {
+        $mean = $totalRate{$key}{$id} / $totalVotes{$key}{$id};
         if ($bayesian) {
-          $mean = ($avg_num_votes * $avg_rating + $totalVotes{$key} * $mean) / ($avg_num_votes + $totalVotes{$key});
+          $mean = ($avg_num_votes * $avg_rating + $totalVotes{$key}{$id} * $mean) / ($avg_num_votes + $totalVotes{$key}{$id});
         }
       }
-      push(@rows, $this->showLineOfStars($id, $prompt, $submit, $needSubmit, $act, $mean, $myLastVote, $totalVoters{$key} || 0));
+      push(@rows, $this->showLineOfStars($id, $prompt, $submit, $needSubmit, $act, $mean, $myLastVote, $totalVoters{$key}{$id} || 0));
     } else {
       my $opts = CGI::option({
           selected => 'selected',
@@ -283,7 +283,7 @@ sub handleVOTE {
       }
       my $select = $submit ? CGI::Select($o, $opts) : '';
 
-      push(@rows, $this->showSelect($id, $prompt, $submit, $select, $keyValueFreq{$id}{$key}, $totalVotes{$key}, $params));
+      push(@rows, $this->showSelect($id, $prompt, $submit, $select, $keyValueFreq{$id}{$key}, $totalVotes{$key}{$id}, $params));
     }
   }
 
@@ -636,39 +636,40 @@ sub showLineOfStars {
   $row =~ s/\$(small|large)/$ul/g;
 
   return $row;
+}
 
 ### static functions
 
-  # wrapper
-  sub _normalizeFileName {
-    my $fileName = shift;
+# wrapper
+sub _normalizeFileName {
+  my $fileName = shift;
 
-    if (defined &Foswiki::Sandbox::normalizeFileName) {
-      return Foswiki::Sandbox::normalizeFileName($fileName);
-    }
-
-    if (defined &Foswiki::normalizeFileName) {
-      return Foswiki::normalizeFileName($fileName);
-    }
-
-    Foswiki::Func::writeWarning("normalizeFileName not found ... you live dangerous");
-    return $fileName;
+  if (defined &Foswiki::Sandbox::normalizeFileName) {
+    return Foswiki::Sandbox::normalizeFileName($fileName);
   }
 
-  sub _inlineError {
-    return '<span class="foswikiAlert">Error: ' . $_[0] . '</span>';
+  if (defined &Foswiki::normalizeFileName) {
+    return Foswiki::normalizeFileName($fileName);
   }
 
-  sub _writeDebug {
-    print STDERR '- VotePlugin - ' . $_[0] . "\n" if TRACE;
-  }
+  Foswiki::Func::writeWarning("normalizeFileName not found ... you live dangerous");
+  return $fileName;
+}
 
-  sub _getLocalDate {
-    my ($sec, $min, $hour, $mday, $mon, $year) = localtime(time());
-    $year = sprintf("%.4u", $year + 1900);    # Y2K fix
-    my $date = sprintf("%.2u-%.2u-%.2u", $year, $mon + 1, $mday);
-    return $date;
-  }
+sub _inlineError {
+  return '<span class="foswikiAlert">Error: ' . $_[0] . '</span>';
+}
 
-  1;
+sub _writeDebug {
+  print STDERR '- VotePlugin - ' . $_[0] . "\n" if TRACE;
+}
+
+sub _getLocalDate {
+  my ($sec, $min, $hour, $mday, $mon, $year) = localtime(time());
+  $year = sprintf("%.4u", $year + 1900);    # Y2K fix
+  my $date = sprintf("%.2u-%.2u-%.2u", $year, $mon + 1, $mday);
+  return $date;
+}
+
+1;
 
