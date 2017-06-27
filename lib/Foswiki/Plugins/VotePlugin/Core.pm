@@ -23,7 +23,7 @@ use Digest::MD5 qw(md5_base64);
 use Fcntl qw(:flock);
 use CGI;
 
-use constant TRACE => 0; # toggle me
+use constant TRACE => 0;    # toggle me
 
 sub new {
   my $class = shift;
@@ -41,7 +41,7 @@ sub handleVOTE {
   my $type = $params->{_DEFAULT} // $params->{type};
 
   unless (defined $type) {
-    # determin type automatically for backwards compatibility;    
+    # determin type automatically for backwards compatibility;
     $type = 'legacySelect' if defined $params->{select1};
     $type = 'legacyStar' if defined $params->{stars1};
   }
@@ -636,43 +636,39 @@ sub showLineOfStars {
   $row =~ s/\$(small|large)/$ul/g;
 
   return $row;
-}
 
 ### static functions
 
-# wrapper
-sub _normalizeFileName {
-  my $fileName = shift;
+  # wrapper
+  sub _normalizeFileName {
+    my $fileName = shift;
 
-  if (defined &Foswiki::Sandbox::normalizeFileName) {
-    return Foswiki::Sandbox::normalizeFileName($fileName);
+    if (defined &Foswiki::Sandbox::normalizeFileName) {
+      return Foswiki::Sandbox::normalizeFileName($fileName);
+    }
+
+    if (defined &Foswiki::normalizeFileName) {
+      return Foswiki::normalizeFileName($fileName);
+    }
+
+    Foswiki::Func::writeWarning("normalizeFileName not found ... you live dangerous");
+    return $fileName;
   }
 
-  if (defined &Foswiki::normalizeFileName) {
-    return Foswiki::normalizeFileName($fileName);
+  sub _inlineError {
+    return '<span class="foswikiAlert">Error: ' . $_[0] . '</span>';
   }
 
-  Foswiki::Func::writeWarning("normalizeFileName not found ... you live dangerous");
-  return $fileName;
-}
+  sub _writeDebug {
+    print STDERR '- VotePlugin - ' . $_[0] . "\n" if TRACE;
+  }
 
+  sub _getLocalDate {
+    my ($sec, $min, $hour, $mday, $mon, $year) = localtime(time());
+    $year = sprintf("%.4u", $year + 1900);    # Y2K fix
+    my $date = sprintf("%.2u-%.2u-%.2u", $year, $mon + 1, $mday);
+    return $date;
+  }
 
-
-sub _inlineError {
-  return '<span class="foswikiAlert">Error: ' . $_[0] . '</span>';
-}
-
-sub _writeDebug {
-  print STDERR '- VotePlugin - '.$_[0]."\n" if TRACE;
-}
-
-sub _getLocalDate {
-  my ($sec, $min, $hour, $mday, $mon, $year) = localtime(time());
-  $year = sprintf("%.4u", $year + 1900);    # Y2K fix
-  my $date = sprintf("%.2u-%.2u-%.2u", $year, $mon + 1, $mday);
-  return $date;
-}
-
-
-1;
+  1;
 
